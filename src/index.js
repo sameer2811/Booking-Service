@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const serverConfig = require('./config/serverConfig');
+const apiRouter = require('./routes');
 
 // Initializing the express app.
 const app = express();
@@ -12,6 +13,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
+app.use('/api', apiRouter);
 
 // Server startup definitions.
 async function startServer() {
