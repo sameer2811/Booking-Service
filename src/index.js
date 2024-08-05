@@ -19,7 +19,7 @@ app.use('/api', apiRouter);
 async function startServer() {
     app.listen(serverConfig.PORT, async function () {
         console.log(`Server has Started Listening at PORT ${serverConfig.PORT}`);
-    })
+    });
 }
 
 // calling the server.
