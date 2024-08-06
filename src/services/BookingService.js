@@ -6,19 +6,45 @@ const {
 const {
     StatusCodes
 } = require('http-status-codes');
+const db = require('../models');
 class BookingService {
 
-    constructor() {}
+    constructor(repository) {
+        this.repository = repository;
+    }
 
     async createBooking(data) {
+        const transaction = await db.sequelize.transaction();
         try {
-            console.log(data);
             let flightDetails = await axios.get(`${serverConfig.FLIGHT_SERVICE_URL}/api/v1/flights/${data.flightId}`);
-            console.log(flightDetails.data.data);
-            return flightDetails.data.data;
+            const flightPayload = flightDetails.data.data;
+            let totalBillingAmount = parseInt(data.seats) * parseFloat(flightPayload.price);
+            if (parseInt(flightPayload.totalSeats) >= parseInt(data.seats)) {
+                // Make a booking entry in the booking table with booking initiated.
+                await this.repository.createBooking({
+                    flightId: data.flightId,
+                    userId: data.userId,
+                    totalCost: totalBillingAmount,
+                    noOfseats: data.seats
+                }, transaction)
+                // Make a call to the flight service to update the seats
+                await axios.patch(`${serverConfig.FLIGHT_SERVICE_URL}/api/v1/flights/${data.flightId}/seats`, {
+                    seats: parseInt(data.seats),
+                    dec: true
+                });
+            } else {
+                throw "Not enough number of seats ";
+            }
+            await transaction.commit();
+            return {
+                flightId: data.flightId,
+                userId: data.userId,
+                totalCost: totalBillingAmount,
+                noOfseats: data.seats
+            };
         } catch (error) {
-            console.log(error);
-            return new AppError(StatusCodes.BAD_REQUEST, "Not able to fetch the bookings");
+            await transaction.rollback();
+            return new AppError(StatusCodes.BAD_REQUEST, error);
         }
     }
 };

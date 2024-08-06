@@ -8,14 +8,18 @@ const {
     successResponse,
     errorResponse
 } = require("../utils/common");
+const {
+    BookingRepository
+} = require("../repositories");
 
-const bookingService = new BookingService();
+const bookingService = new BookingService(new BookingRepository());
 
 async function createBookingController(req, res) {
     try {
         let data = {
             flightId: req.body.flightId,
-            seats: req.body.seats
+            seats: req.body.seats,
+            userId: req.body.userId
         };
         const response = await bookingService.createBooking(data);
         successResponse.data = response;

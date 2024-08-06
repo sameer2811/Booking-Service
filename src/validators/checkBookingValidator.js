@@ -14,6 +14,10 @@ async function checkBookingValidation(req, res, next) {
         errorResponse.description = 'seats property is not defined properly.';
         return res.status(StatusCodes.BAD_REQUEST).json(errorResponse);
     }
+    if (!req.body.userId) {
+        errorResponse.description = 'userId property is not defined properly.';
+        return res.status(StatusCodes.BAD_REQUEST).json(errorResponse);
+    }
     next();
 }
 
