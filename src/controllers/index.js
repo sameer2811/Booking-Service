@@ -1,3 +1,4 @@
 module.exports = {
-    createBookingController : require('./BookingController')
+    createBookingController : require('./BookingController'),
+    createPaymentController : require('./PaymentController')
 };

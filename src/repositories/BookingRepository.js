@@ -13,16 +13,22 @@ class BookingRepository extends CrudRepository {
         });
     }
 
-    async updateBooking(bookingPayload, transaction) {
-        await Booking.create(bookingPayload, {
+    async updateBooking(key, updateStatus, transaction) {
+        const response = await Booking.update(updateStatus, {
+            where: {
+                id: key
+            }
+        }, {
             transaction: transaction
         });
+        return response;
     }
 
-    async getBooking(bookingPayload, transaction) {
-        await Booking.create(bookingPayload, {
+    async getBooking(bookingId, transaction) {
+        const response = await Booking.findByPk(bookingId, {
             transaction: transaction
         });
+        return response;
     }
 }
 
