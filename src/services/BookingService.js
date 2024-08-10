@@ -28,7 +28,7 @@ class BookingService {
                     userId: data.userId,
                     totalCost: totalBillingAmount,
                     noOfseats: data.seats
-                }, transaction)
+                }, transaction);
                 // Make a call to the flight service to update the seats
                 await axios.patch(`${serverConfig.FLIGHT_SERVICE_URL}/api/v1/flights/${data.flightId}/seats`, {
                     seats: parseInt(data.seats),
