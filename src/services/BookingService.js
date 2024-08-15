@@ -56,28 +56,28 @@ class BookingService {
             const bookingDetails = await this.repository.getBooking(bookingData.bookingId, transaction);
 
             if (!bookingDetails) {
-                return new AppError(StatusCodes.BAD_REQUEST, `No Booking details found for this id`);
+                throw new AppError(StatusCodes.BAD_REQUEST, `No Booking details found for this id`);
             }
 
             if (bookingDetails.status == BOOKING_STATUS.CANCELLED || bookingDetails.status == BOOKING_STATUS.BOOKED) {
-                return new AppError(StatusCodes.BAD_REQUEST, `Booking is already in a cancelled state or booked state`);
+                throw new AppError(StatusCodes.BAD_REQUEST, `Booking is already in a cancelled state or booked state`);
             }
             const currentTime = new Date();
             const bookingTime = new Date(bookingDetails.createdAt);
 
             // check price
             if (bookingData.price != bookingDetails.totalCost) {
-                return new AppError(StatusCodes.BAD_REQUEST, `price does not match for the booking`);
+                throw new AppError(StatusCodes.BAD_REQUEST, `price does not match for the booking`);
             }
             // check userId
             if (bookingData.userId != bookingDetails.userId) {
-                return new AppError(StatusCodes.BAD_REQUEST, `UserId does not match for the booking`);
+                throw new AppError(StatusCodes.BAD_REQUEST, `UserId does not match for the booking`);
             }
 
             //  check time is more then 5 min (convert to millisec)
             if (currentTime - bookingTime >= 300000) {
                 await this.cancelBooking(bookingData.bookingId);
-                return new AppError(StatusCodes.BAD_REQUEST, `Booking has expired for the time Being of booking id ${bookingData.bookingId}`);
+                throw new AppError(StatusCodes.BAD_REQUEST, `Booking has expired for the time Being of booking id ${bookingData.bookingId}`);
             }
             const response = await this.repository.updateBooking(bookingData.bookingId, {
                 status: BOOKING_STATUS.BOOKED,
@@ -87,6 +87,7 @@ class BookingService {
             return response;
         } catch (error) {
             await transaction.rollback();
+            throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -113,6 +114,7 @@ class BookingService {
             await transaction.commit();
         } catch (error) {
             await transaction.rollback();
+            throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error);
         }
     }
 };
